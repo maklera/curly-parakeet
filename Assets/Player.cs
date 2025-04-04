@@ -14,6 +14,21 @@ public class Player : MonoBehaviour
     [SerializeField] private Slider healthSlider;
     [SerializeField] private TextMeshProUGUI goldText;
     
+    public delegate void PlayerStateChanged();
+    public event PlayerStateChanged OnHealthChanged;
+    public event PlayerStateChanged OnGoldChanged;
+    
+    public int MaxHealth => maxHealth;
+    public int CurrentHealth => currentHealth;
+    public int CurrentGold => currentGold;
+    public bool IsAlive => currentHealth > 0;
+    
+    private void Start()
+    {
+        UpdateHealthUI();
+        UpdateGoldUI();
+    }
+    
     private void UpdateHealthUI()
     {
         if (healthText != null)
@@ -34,62 +49,130 @@ public class Player : MonoBehaviour
         {
             goldText.text = currentGold.ToString();
         }
-        
     }
     
-    public void Heal(int healAmount, int costAmount)
+    public bool CanAfford(int cost)
     {
-        // Check if player needs healing
-        if (currentHealth < maxHealth && currentHealth != 0 && currentGold > 0)
+        return currentGold >= cost;
+    }
+    
+    public bool SpendGold(int amount)
+    {
+        if (!CanAfford(amount))
         {
-            // Add healing amount
-            currentHealth += healAmount;
-            currentGold -= costAmount;
-            
-            // Make sure we don't exceed max health
-            if (currentHealth > maxHealth)
-            {
-                currentHealth = maxHealth;
-            }
-            
-            Debug.Log($"Healed for {healAmount}. Current health: {currentHealth}/{maxHealth}");
-            UpdateHealthUI();
-            UpdateGoldUI();
+            Debug.Log($"Not enough gold! Need: {amount}, Current: {currentGold}");
+            return false;
         }
-        else
+        
+        currentGold -= amount;
+        UpdateGoldUI();
+        
+        if (OnGoldChanged != null)
+            OnGoldChanged();
+        
+        return true;
+    }
+    
+    public void AddGold(int amount)
+    {
+        currentGold += amount;
+        UpdateGoldUI();
+        
+        if (OnGoldChanged != null)
+            OnGoldChanged();
+        
+        Debug.Log($"Spent {amount} gold. Current: {currentGold}");
+    }
+    
+    public bool Heal(int healAmount, int costAmount)
+    {
+        if (!IsAlive)
+        {
+            Debug.Log("Already dead! First resurrection!.");
+            return false;
+        }
+        
+        if (currentHealth >= maxHealth)
         {
             Debug.Log("Already at full health!");
+            return false;
         }
+        
+        if (!SpendGold(costAmount))
+        {
+            return false;
+        }
+        
+        currentHealth += healAmount;
+        
+        if (currentHealth > maxHealth)
+        {
+            currentHealth = maxHealth;
+        }
+        
+        Debug.Log($"Healed for {healAmount}. Current health: {currentHealth}/{maxHealth}");
+        UpdateHealthUI();
+        
+        if (OnHealthChanged != null)
+            OnHealthChanged();
+        
+        return true;
     }
     
-    public void Poison(int damageAmount, int costAmount)
+    public bool Poison(int damageAmount, int costAmount)
     {
-        // Check if player needs healing
-        if (currentHealth > 0 && currentGold > 0)
+        if (!IsAlive)
         {
-            // Add healing amount
-            currentHealth -= damageAmount;
-            currentGold -= costAmount;
-            
-            // Make sure we don't exceed max health
-            if (currentHealth < 0)
-            {
-                currentHealth = 0;
-            }
-            
-            Debug.Log($"Damaged for {damageAmount}. Current health: {currentHealth}/{maxHealth}");
-            UpdateHealthUI();
-            UpdateGoldUI();
+            Debug.Log("Already dead!");
+            return false;
+        }
+        
+        if (!SpendGold(costAmount))
+        {
+            return false;
+        }
+        
+        currentHealth -= damageAmount;
+        
+        if (currentHealth < 0)
+        {
+            currentHealth = 0;
+            Debug.Log($"Damaged for {damageAmount}. Player killed!");
         }
         else
         {
-            Debug.Log("Already dead!");
+            Debug.Log($"Damaged for {damageAmount}. Current health: {currentHealth}/{maxHealth}");
         }
+        
+        UpdateHealthUI();
+        
+        if (OnHealthChanged != null)
+            OnHealthChanged();
+        
+        return true;
     }
     
-    private void Start()
+    public bool Resurrect(int healthAmount, int costAmount)
     {
+        if (IsAlive)
+        {
+            Debug.Log("Player is alive!");
+            return false;
+        }
+        
+        if (!SpendGold(costAmount))
+        {
+            return false;
+        }
+        
+        currentHealth = healthAmount;
+        
+        Debug.Log($"Player resurrected with {healthAmount} health!");
         UpdateHealthUI();
-        UpdateGoldUI();
+        
+        if (OnHealthChanged != null)
+            OnHealthChanged();
+        
+        return true;
     }
 }

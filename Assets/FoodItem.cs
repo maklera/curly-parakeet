@@ -4,9 +4,13 @@ using UnityEngine.EventSystems;
 
 public class FoodItem : MonoBehaviour, IPointerClickHandler
 {
+    public enum ItemType { Healing, Poison, Resurrection }
+    
+    [SerializeField] private ItemType itemType;
     [SerializeField] private int healAmount = 20;
     [SerializeField] private int damageAmount = 20;
-    [SerializeField] public int costAmount = 20;
+    [SerializeField] private int costAmount = 20;
+    [SerializeField] private int resurrectionAmount = 1;
     private Player playerReference;
     
     private void Start()
@@ -31,8 +35,18 @@ public class FoodItem : MonoBehaviour, IPointerClickHandler
     {
         if (playerReference != null)
         {
-            playerReference.Heal(healAmount, costAmount);
-            playerReference.Poison(damageAmount, costAmount);
+            switch (itemType)
+            {
+                case ItemType.Healing:
+                    playerReference.Heal(healAmount, costAmount);
+                    break;
+                case ItemType.Poison:
+                    playerReference.Poison(damageAmount, costAmount);
+                    break;
+                case ItemType.Resurrection:
+                    playerReference.Resurrect(resurrectionAmount, costAmount);
+                    break;
+            }
         }
         else
         {
