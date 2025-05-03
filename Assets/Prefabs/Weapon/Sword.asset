@@ -12,10 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b9ced13fc5a370c4f9484bb0019aac59, type: 3}
   m_Name: Sword
   m_EditorClassIdentifier: 
-  id: sword
+  id: 0003
   displayName: Sword
   damage: 15
   staminaCoast: 5
   durability: 20
   cost: 10
   sprite: {fileID: -2848271216744821043, guid: 724d5245c90e2e3409e8c6d38515566e, type: 3}
+  canStack: 0
+  maxStack: 0

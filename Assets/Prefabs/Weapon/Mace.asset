@@ -12,10 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b9ced13fc5a370c4f9484bb0019aac59, type: 3}
   m_Name: Mace
   m_EditorClassIdentifier: 
-  id: mace
+  id: 0002
   displayName: Mace
   damage: 25
   staminaCoast: 10
   durability: 20
   cost: 10
   sprite: {fileID: 2136130118105564158, guid: a6b70abcee1f471479e6aac6fc44943b, type: 3}
+  canStack: 0
+  maxStack: 0

@@ -10,4 +10,6 @@ public class WeaponData : ScriptableObject
     public float durability;
     public int cost;
     public Sprite sprite;
+    public bool canStack;
+    public int maxStack;
 }
